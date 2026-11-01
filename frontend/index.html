@@ -1,0 +1,178 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Restaking — Rings Within Rings on BOT Chain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600&family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@reown/appkit@1.8.21/dist/appkit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@reown/appkit-adapter-ethers@1.8.21/dist/appkit-adapter-ethers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<style>
+:root{--motion-fast:200ms;--motion-base:600ms;--motion-slow:1100ms;--ox:#12301f;--ox2:#1b4530;--peach:#f6ead6;--lil:#d9693f;--line:rgba(246,234,214,.22)}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{background:var(--ox);color:var(--peach);font:400 16px/1.55 'Manrope',sans-serif;overflow-x:hidden}
+.mono{font-family:'DM Mono',monospace}a{color:inherit}
+nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 20px;mix-blend-mode:normal;background:linear-gradient(var(--ox),transparent)}
+.logo{font:400 26px 'Fraunces',serif;letter-spacing:-.02em}.logo i{color:var(--lil)}
+.wal{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.badge{font:600 11px 'DM Mono';border:1px solid var(--lil);color:var(--lil);border-radius:99px;padding:6px 10px;white-space:nowrap}
+select,input,button{font:inherit;color:inherit}
+select{background:var(--ox2);border:1px solid var(--line);border-radius:99px;padding:7px 10px;font-size:13px}
+#connect,.btn{background:var(--peach);color:var(--ox);border:0;border-radius:99px;padding:10px 18px;font-weight:800;cursor:pointer;transition:.3s}
+#connect:hover,.btn:hover{background:var(--lil);transform:scale(1.04)}
+.xl{display:inline-flex;gap:6px;align-items:center;text-decoration:none;font:600 13px 'DM Mono'}
+.hero{min-height:100vh; grid-auto-fl grid-auto-flow:dense;ow:dense; grid-auto-fl grid-auto-flow:dense;ow:dense;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;padding:110px 5vw 40px;position:relative}
+h1{font:400 clamp(60px,12vw,190px)/.86 'Fraunces',serif;letter-spacing:-.04em}h1 em{color:var(--lil);font-style:italic}
+.hero p{max-width:440px;margin-top:28px;font-size:18px}.launch{display:inline-block;margin-top:22px;border:1px solid var(--peach);padding:8px 14px;border-radius:99px;font:600 12px 'DM Mono';text-transform:uppercase;letter-spacing:.08em}
+.rings{width:100%;max-width:560px;justify-self:center;aspect-ratio:1}.rings circle{fill:none;stroke:var(--peach);stroke-width:1.2;transform-origin:50% 50%;animation:sp 40s linear infinite}
+.rings circle:nth-child(2n){stroke:var(--lil);animation-direction:reverse;animation-duration:55s}.rings .dot{fill:var(--peach);stroke:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.mq{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding:14px 0;font:400 44px 'Fraunces'}.mq div{display:inline-block;animation:mq 28s linear infinite}.mq span{margin:0 26px}.mq span:nth-child(even){color:var(--lil);font-style:italic}
+@keyframes mq{ grid-auto-flow:dense;to{ grid-auto-f grid-auto-fl grid-auto-flow:dense;ow:dense;low:dense;transform:translateX(-50%)}}
+.ops{display:grid;grid-template-columns:5fr 7fr;gap:6vw;padding:12vh 5vw}
+.sticky{position:sticky;top:90px;align-self:start}.sticky h2{font:400 clamp(44px,6vw,90px)/.95 'Fraunces';letter-spacing:-.03em}
+.nest{margin-top:30px;width:min(320px,80%);aspect-ratio:1;position:relative}.nest i{position:absolute;inset:0;margin:auto;border:1.5px solid var(--lil);border-ra grid-auto-flow:dense; grid-auto-flow:dense;dius:50%;transition:all .8s cubic-bezier(.2,.8,.2,1)}
+.nest b{position:absolute;inset:0;display:grid;place-items:center;font:400 40px 'Fraunces'}
+.ch{border-top:1px solid var(--line);padding:30px 0 40px;opacity:0;transform:translateY(40px);transition:1s cubic-bezier(.2,.8,.2,1)}.ch.in{opacity:1;transform:none}.ch:nth-child(2){margin-left:8vw}.ch:nth-child(4){margin-left:4vw}
+.ch small{font:600 12px 'DM Mono';color:var(--lil)}.ch h3{font:400 40px/1 'Fraunces';margin:6px 0 16px}
+.row{display:flex;gap:10px;flex-wrap:wrap}input{background:transparent;border:0;border-bottom:1px solid var(--peach);padding:10px 2px;min-width:0;flex:1 1 150px;outline:0}input:focus{border-color:var(--lil)}input::placeholder{color:rgba(246,234,214,.45)}
+.out{margin-top:16px;font:400 13px/1.7 'DM Mono';color:var(--lil);white-space:pre-wrap;word-break:break-all}
+footer{border-top:1px solid var(--line);padding:26px 5vw 40px;display:flex;flex-wrap:w grid-auto-flow:dense; grid-auto-flow:dense;rap;gap:8px 14px;font:400 12px 'DM Mono';opacity:.85}
+#toast{position:fixed;right:16px;bottom:16px;z-index:50;display:grid;gap:8px;max-width:calc(100vw - 32px)}.t{background:var(--peach);color:var(--ox);padding:12px 16px;border-radius:14px;font-weight:600;font-size:14px;transform:translateX(120%);transition:.4s}.t.in{transform:none}.t.err{background:#ffb199}.t.ok{background:var(--lil)}.t.demo{background:#fff}
+.cur{position:fixed;width:34px;height:34px;border:1px solid var(--lil);border-radius:50%;pointer-events:none;z-index:99;transform:translate(-50%,-50%);transition:width .25s,height .25s;left:-50px;top:-50px}.cur.h{ grid-auto-flow:dens grid-auto-flow:dense;e;width:70px;height:70px;background:rgba(217,105,63,.15)}
+@media(hover:none){.cur{display:none}}
+@media(max-width:800px){.hero,.ops{grid-template-columns:1fr}.sticky{position:static}.ch:nth-child(n){margin-left:0}nav{padding:10px 12px}.logo{font-size:20px}.mq{font-size:30px}}
+
+@media(prefers-reduced-motion:reduce){.rv{transition:none!important;opacity:1;transform:none!important}*{animation:none!important}}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc,currentColor);outline-offset:2px}</style></head><body>
+<div class="cur" id="cur"></div>
+<nav><div class="logo">Re<i>stake</i></div><div class="wal"><a class="xl" id="xl" href="javascript:void(0)" target="_blank" rel="noopener"></a><span class="badge">Chain ID <span class="chainid">677</span></span><select id="net"><option value="677">Mainnet 677</option><option value="968">Testnet 968</option></select><button id="connect" onclick="appkitConnect()" >Connect</button></div></nav>
+<section class="hero"><div><span class="launch">Built on BOT Chain Mainnet</span><h1 style="margin-top:22px">Stake<br>it <em>again.</em></h1><p>One deposit, shares that compound inside shares. Restake your BOT and let every ring earn its own reward rate.</p></div>
+<svg class="rings" viewBox="0 0 400 400"><circle cx="200" cy="200" r="190" stroke-dasharray="2 8"/><circle cx="200" cy="200" r="150"/><circle cx="200" cy="200" r="112" stroke-dasharray="40 6"/><circle cx="200" cy="200" r="76"/><circle cx="200" cy="200" r="42" stroke-dasharray="3 5"/><circle class="dot" cx="200" cy="10" r="6"/><circle class="dot" cx="200" cy="50" r="5"/><circle class="dot" cx="200" cy="124" r="4"/></svg></section>
+<div class="mq"><div id="mq"></div></div>
+<section class="ops"><div class="sticky"><h2 class="rv">Four moves.<br>Infinite rings.</h2><div class="nest" id="nest"><b id="nb">0</b></div><p class="mono" style="font-size:12px;margin-top:14px">Shares held (demo: <span id="sh">0</span>)</p></div>
+<div>
+<div class="ch rv"><small>01 — restake</small><h3>Restake for shares</h3><div class="row"><input id="a1" type="number" step="any" placeholder="Amount in BOT"><button class="btn" id="b1">Restake</button></div><div class="out" id="o1"></div></div>
+<div class="ch rv"><small>02 — unrestake</small><h3>Peel a ring off</h3><div class="row"><input id="a2" type="number" step="any" placeholder="Shares to burn"><button class="btn" id="b2">Unrestake</button></div><div class="out" id="o2"></div></div>
+<div class="ch rv"><small>03 — updateRewardRate</small><h3>Tune the rate</h3><div class="row"><input id="a3" type="number" placeholder="Rate in basis points (e.g. 450)"><button class="btn" id="b3">Update rate</button></div><div class="out" id="o3"></div></div>
+<div class="ch rv"><small>04 — getRestake</small><h3>Read a position</h3><div class="row"><input id="a4" placeholder="Address (blank = you)"><button class="btn" id="b4">Fetch</button></div><div class="out" id="o4"></div></div>
+</div></section>
+<footer><span>Restaking — Restake BOT for compounding shares on BOT Chain</span><span>&#8226; Chain ID <b>677</b> &#8226; Contract <span class="mono">0xCA…</span></span><span>&#8226; <a href="https://botchain.ai" target="_blank" rel="noopener">BOT Chain Website</a> &#8226; <a href="https://scan.botchain.ai/" target="_blank" rel="noopener">BOTScan Explorer</a></span></footer>
+<div id="toast"></div>
+<script>
+const X_URL='https://x.com/TODO_handle'; // TODO: set project X handle
+const CA={677:'0xCA…TODO',968:''}; // TODO: set deployed contract addresses
+const CHAINS={677:{hex:'0x2a5',name:'BOT Chain Mainnet',rpc:'https://rpc.botchain.ai',ex:'https://scan.botchain.ai'},968:{hex:'0x3c8',name:'BOT Chain Testnet',rpc:'https://rpc.bohr.life',ex:null}};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let provider=null,signer=null,account=null,chain=677;
+const short=a=>a?a.slice(0,6)+'…'+a.slice(-4):'';
+function toast(m,t){const el=$('#toast');const d=document.createElement('div');d.className='t '+(t||'');d.textContent=m;el.appendChild(d);setTimeout(()=>d.classList.add('in'),10);setTimeout(()=>{d.classList.remove('in');setTimeout(()=>d.remove(),400)},4200)}
+async function switchChain(id){const c=CHAINS[id];if(!window.ethereum)return;
+ try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:c.hex}]})}
+ catch(e){if(e.code===4902||(e.data&&e.data.originalError&&e.data.originalError.code===4902)||/unrecognized|not added/i.test(explainError(e)||'')){
+  const p={chainId:c.hex,chainName:c.name,nativeCurrency:{name:'BOT',symbol:'BOT',decimals:18},rpcUrls:[c.rpc]};if(c.ex)p.blockExplorerUrls=[c.ex];
+  await window.ethereum.request({method:'wallet_addEthereumChain',params:[p]})}else throw e}}
+, true);
+
+// ===== Phase B: AppKit + GSAP runtime =====
+const PROJECT_ID='f018499b1e4a94d961ab67aeeeff3254';
+const CA677='0x0000000000000000000000000000000000000000';
+const NETS={677:{label:'Mainnet 677',rpc:'https://rpc.botchain.ai',hex:'0x2a5',ca:CA677},968:{label:'Testnet 968',rpc:'https://rpc.bohr.life',hex:'0x3c8',ca:'0x0000000000000000000000000000000000000000'}};
+let appkit=null, currentNet=677;
+
+async function initAppKit(){
+  try{
+    const {createAppKit}=window;
+    const {EthersAdapter}=window;
+    const adapter=new EthersAdapter();
+    appkit=createAppKit({
+      adapters:[adapter],
+      networks:[
+        {id:677,name:'BOT Mainnet',nativeCurrency:{name:'BOT',symbol:'BOT',decimals:18},rpcUrls:{default:{http:['https://rpc.botchain.ai']}}},
+        {id:968,name:'BOT Testnet',nativeCurrency:{name:'BOT',symbol:'BOT',decimals:18},rpcUrls:{default:{http:['https://rpc.bohr.life']}}}
+      ],
+      projectId:PROJECT_ID,
+      features:{analytics:false}
+    });
+    appkit.subscribeAccount((a)=>{const addr=a.address||null;const b=$('#connect')||$('#connectBtn')||$('#walletBtn')||$('#wbtn');if(b)b.textContent=addr?addr.slice(0,6)+'…'+addr.slice(-4):'Connect wallet';const m=$('#mode')||$('#modeTag');if(m)m.textContent=addr?'LIVE':'DEMO';});
+    appkit.subscribeNetwork((n)=>{if(n&&n.chainId){currentNet=Number(n.chainId);const b=$('#badge')||$('#cid')||$('#chainBadge')||$('#netpill');if(b)b.textContent='Chain ID '+currentNet;}});
+  }catch(e){console.warn('AppKit init failed',e);}
+}
+async function appkitConnect(){
+  if(!appkit)await initAppKit();
+  if(appkit){try{await appkit.open();}catch(e){toast('AppKit connect failed: '+(explainError(e)||e.code),'err');}return;}
+  // Fallback: raw ethers connect
+  if(!window.ethereum){toast('No wallet found - install a Web3 wallet',true);return;}
+  try{const accts=await window.ethereum.request({method:'eth_requestAccounts'});setWallet(accts.length>0,accts[0]);provider=new ethers.BrowserProvider(window.ethereum);signer=await provider.getSigner();await ensureChain();initContract();}catch(e){toast('Wallet connect: '+ (explainError(e)||e.code),true);}}
+function setWallet(connected,addr){const b=$('#connect')||$('#connectBtn')||$('#walletBtn')||$('#wbtn');if(b)b.textContent=addr?addr.slice(0,6)+'…'+addr.slice(-4):'Connect wallet';b.classList.toggle('connected',!!addr);}
+function initContract(){if(!currentNet){return;}try{const provider=new ethers.JsonRpcProvider(NETS[currentNet].rpc);const abi=[];contract=new ethers.Contract(NETS[currentNet].ca,abi,signer||provider);}catch(e){console.warn('contract init',e);contract=null;}}
+async function ensureChain(){if(!window.ethereum)return;try{const cid=await window.ethereum.request({method:'eth_chainId'});currentNet=Number(cid);if(NETS[currentNet]){}else{try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x2a5'}]});currentNet=677;}catch(sw){if(sw.code===4902){try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x2a5',chainName:'BOT Chain Mainnet',nativeCurrency:{name:'BOT',symbol:'BOT',decimals:18},rpcUrls:['https://rpc.botchain.ai']}]})}catch(ae){toast('Add chain failed: '+(aexplainError(e)||ae.code),'err');}}}else{toast('Switch rejected: '+(sw.message||sw.code),'err');}}}catch(e){currentNet=677;}}
+
+function explainError(e){if(!e)return 'Unknown error';const m=explainError(e)||explainError(e)||(e.data&&e.data.message)||'';if(e.code===4001)return 'Transaction rejected in wallet. Nothing spent on-chain.';let msg=String(m||explainError(e)||String(e));msg=msg.replace(/^execution reverted:/i,'').trim();if(msg.length>170)msg=msg.slice(0,167)+'...';return msg;}
+// ===== Phase B: AppKit + GSAP runtime =====
+const PROJECT_ID='f018499b1e4a94d961ab67aeeeff3254';
+const CA677='0x0000000000000000000000000000000000000000';
+const NETS={677:{label:'Mainnet 677',rpc:'https://rpc.botchain.ai',hex:'0x2a5',ca:CA677},968:{label:'Testnet 968',rpc:'https://rpc.bohr.life',hex:'0x3c8',ca:'0x0000000000000000000000000000000000000000'}};
+let appkit=null, currentNet=677, contract=null, signer=null;
+
+async function initAppKit(){
+  try{
+    const {createAppKit}=window;
+    const {EthersAdapter}=window;
+    const adapter=new EthersAdapter();
+    appkit=createAppKit({
+      adapters:[adapter],
+      networks:[
+        {id:677,name:'BOT Mainnet',nativeCurrency:{name:'BOT',symbol:'BOT',decimals:18},rpcUrls:{default:{http:['https://rpc.botchain.ai']}}},
+        {id:968,name:'BOT Testnet',nativeCurrency:{name:'BOT',symbol:'BOT',decimals:18},rpcUrls:{default:{http:['https://rpc.bohr.life']}}}
+      ],
+      projectId:PROJECT_ID,
+      features:{analytics:false}
+    });
+    appkit.subscribeAccount((a)=>{const addr=a.address||null;const b=$('#connect')||$('#connectBtn')||$('#walletBtn')||$('#wbtn');if(b)b.textContent=addr?addr.slice(0,6)+'…'+addr.slice(-4):'Connect wallet';const m=$('#mode')||$('#modeTag');if(m)m.textContent=addr?'LIVE':'DEMO';});
+    appkit.subscribeNetwork((n)=>{if(n&&n.chainId){currentNet=Number(n.chainId);const b=$('#badge')||$('#cid')||$('#chainBadge')||$('#netpill');if(b)b.textContent='Chain ID '+currentNet;}});
+  }catch(e){console.warn('AppKit init failed',e);}
+}
+async function appkitConnect(){
+  if(!appkit)await initAppKit();
+  if(appkit){try{await appkit.open();}catch(e){toast('AppKit connect failed: '+(e.message||e.code),'err');return;}}
+  if(!window.ethereum){toast('No wallet found - install a Web3 wallet',true);return;}
+  try{const accts=await window.ethereum.request({method:'eth_requestAccounts'});setWallet(accts.length>0,accts[0]);provider=new ethers.BrowserProvider(window.ethereum);signer=await provider.getSigner();await ensureChain();initContract();}catch(e){toast('Wallet connect: '+(e.message||e.code),true);}
+}
+function setWallet(connected,addr){const b=$('#connect')||$('#connectBtn')||$('#walletBtn')||$('#wbtn');if(b)b.textContent=addr?addr.slice(0,6)+'…'+addr.slice(-4):'Connect wallet';b.classList.toggle('connected',!!addr);}
+function initContract(){if(!currentNet){return;}try{const provider=new ethers.JsonRpcProvider(NETS[currentNet].rpc);contract=new ethers.Contract(NETS[currentNet].ca,[],signer||provider);}catch(e){console.warn('contract init',e);contract=null;}}
+async function ensureChain(){if(!window.ethereum)return;try{const cid=await window.ethereum.request({method:'eth_chainId'});currentNet=Number(cid);if(!NETS[currentNet]){try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x2a5'}]})}catch(sw){if(sw.code===4902){try{await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x2a5',chainName:'BOT Chain Mainnet',nativeCurrency:{name:'BOT',symbol:'BOT',decimals:18},rpcUrls:['https://rpc.botchain.ai']}]})}catch(ae){toast('Add chain failed: '+(ae.message||ae.code),'err');}}}else{toast('Switch rejected: '+(sw.message||sw.code),'err');}}}catch(e){currentNet=677;}}
+
+function explainError(e){if(!e)return 'Unknown error';const m=e.shortMessage||e.reason||(e.data&&e.data.message)||'';if(e.code===4001)return 'Transaction rejected in wallet. Nothing spent on-chain.';let msg=String(m||e.message||String(e));msg=msg.replace(/^execution reverted:/i,'').trim();if(msg.length>170)msg=msg.slice(0,167)+'...';return msg;}
+
+async function sendTx(btn,fnName,args,valueEth,label){if(!contract||!signer){toast('Connect wallet first',true);return}const resting=btn.textContent;btn.disabled=true;btn.classList.add('busy');btn.textContent='Confirm in wallet...';try{if(!currentNet)await ensureChain();const usable=contract.connect(signer);const tx=valueEth!=null?await usable[fnName](...args,{value:ethers.parseEther(String(valueEth))}):await usable[fnName](...args);const rc=await tx.wait();toast((label||fnName)+' confirmed on '+(currentNet?currentNet.label:'chain'));return tx;}catch(e){toast(explainError(e),true);throw e;}finally{btn.disabled=false;btn.classList.remove('busy');btn.textContent=resting;}}
+
+function initGSAP(){
+  if(typeof gsap==='undefined')return;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced){document.querySelectorAll('.rv').forEach(el=>{el.style.opacity='1';el.style.transform='none';});return;}
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.from('.rv',{opacity:0,y:26,duration:0.7,ease:'expo.out',stagger:0.07});
+  gsap.utils.toArray('.rv').forEach(el=>{gsap.from(el,{opacity:0,y:34,duration:0.8,ease:'expo.out',scrollTrigger:{trigger:el,start:'top 85%'},clearProps:'all'});});
+}
+
+function addBusyStates(){
+  document.addEventListener('click',function(e){const btn=e.target.closest('button');if(btn&&!btn.classList.contains('busy')&&!btn.disabled){btn.disabled=true;btn.classList.add('busy');const origText=btn.textContent;btn.textContent='Confirming...';setTimeout(()=>{btn.disabled=false;btn.classList.remove('busy');btn.textContent=origText;},5000);}},true);
+}
+
+function addAria(){
+  document.querySelectorAll('button').forEach(b=>{if(!b.getAttribute('aria-label')&&!b.getAttribute('aria-labelledby')){b.setAttribute('aria-label',b.textContent.trim()||'button');}});
+  document.querySelectorAll('input,select,textarea').forEach(el=>{if(!el.getAttribute('aria-label')&&!el.getAttribute('aria-labelledby')){const lab=el.previousElementSibling;if(lab&&lab.tagName==='LABEL'){el.setAttribute('aria-labelledby',lab.id||(lab.id='lab-'+Math.random().toString(36).slice(2)));}});
+}
+
+if(window.ethereum&&window.ethereum.on){
+  window.ethereum.on('accountsChanged',(a)=>{
+    const b=$('#connect')||$('#connectBtn')||$('#walletBtn')||$('#wbtn');
+    if(b)b.textContent=a&&a[0]?a[0].slice(0,6)+'…'+a[0].slice(-4):'Connect wallet';
+  });
+  window.ethereum.on('chainChanged',(id)=>{
+    const n=parseInt(id,16);
+    const b=$('#badge')||$('#cid')||$('#chainBadge')||$('#netpill');
+    if(b)b.textContent='Chain ID '+n;
+  });
+}</script></body></html>
