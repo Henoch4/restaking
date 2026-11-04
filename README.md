@@ -1,10 +1,10 @@
 # Restaking
 
-Deposit and inspect restaking positions. Rewards depend on the contract’s configured rate and available funds.
+Restake native BOT, inspect your positions, and withdraw principal plus your share of explicitly funded rewards.
 
 ## Mainnet status
 
-Mainnet deployment is pending. The interface does not simulate transactions or balances.
+Contract on BOT Chain mainnet (677): [0x046C32a441CA77720264f3FAC11d906A7b03199C](https://scan.botchain.ai/address/0x046C32a441CA77720264f3FAC11d906A7b03199C).
 
 Wallet actions require BOT Chain mainnet, deployed bytecode, and a connected compatible wallet. Every action is simulated before a transaction review; only a subsequent wallet confirmation can send it.
 
@@ -19,13 +19,15 @@ Wallet actions require BOT Chain mainnet, deployed bytecode, and a connected com
 
 ## Contract interface
 
-`frontend/product.json` uses the ABI compiled from the current Solidity source.
+`frontend/product.json` uses the current-source ABI, matched against the deployed mainnet runtime bytecode. Explorer source publication is tracked separately.
 
 | Action | Contract signature |
 |---|---|
+| Claim Rewards | `claimRewards(uint256)` |
+| Fund rewards (owner only) | `fundRewards()` |
 | Restake BOT | `restake(address,uint256)` |
 | Withdraw your position | `unrestake(uint256)` |
-| Set the reward rate (owner only) | `updateRewardRate(uint256)` |
+| Withdraw Reward Remainder (owner only) | `withdrawRewardRemainder()` |
 
 ## Run locally
 

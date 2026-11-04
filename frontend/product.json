@@ -1,9 +1,9 @@
 {
-  "abiSource": "pending-current-source",
+  "abiSource": "runtime-matched-current-source",
   "repo": "restaking",
   "brand": "Restaking",
   "summary": "Restake native BOT, inspect your positions, and withdraw principal plus your share of explicitly funded rewards.",
-  "address": null,
+  "address": "0x046C32a441CA77720264f3FAC11d906A7b03199C",
   "owner": null,
   "abi": [
     {
